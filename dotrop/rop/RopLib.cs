@@ -34,7 +34,7 @@ using System.Runtime.InteropServices;
 namespace tech.janky.dotrop.rop {
 
 /**
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopLib {
@@ -201,6 +201,8 @@ public class RopLib {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_export(IntPtr key, IntPtr output, uint flags);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_export_autocrypt(IntPtr key, IntPtr subkey, IntPtr uid, IntPtr output, uint flags);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_export_revocation(IntPtr key, IntPtr output, uint flags, IntPtr hash, IntPtr code, IntPtr reason);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_revoke(IntPtr key, uint flags, IntPtr hash, IntPtr code, IntPtr reason);
@@ -221,13 +223,25 @@ public class RopLib {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_get_uid_handle_at(IntPtr key, uint idx, ref IntPtr uid);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Uid_get_type(IntPtr uid, ref IntPtr type);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Uid_get_data(IntPtr uid, ref IntPtr data, ref IntPtr size);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Uid_is_primary(IntPtr uid, ref IntPtr primary);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Uid_is_valid(IntPtr uid, ref IntPtr valid);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_get_signature_count(IntPtr key, ref IntPtr count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_get_signature_at(IntPtr key, uint idx, ref IntPtr sig);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_revocation_signature(IntPtr key, ref IntPtr sig);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Uid_get_signature_count(IntPtr uid, ref IntPtr count);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Uid_get_signature_at(IntPtr uid, uint idx, ref IntPtr sig);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Signature_get_type(IntPtr sig, ref IntPtr type);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Signature_get_alg(IntPtr sig, ref IntPtr alg);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -239,11 +253,15 @@ public class RopLib {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Signature_get_signer(IntPtr sig, ref IntPtr key);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Signature_is_valid(IntPtr sig, uint flags);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Signature_packet_to_json(IntPtr sig, uint flags, ref IntPtr json);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Signature_handle_destroy(IntPtr sig);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Uid_is_revoked(IntPtr uid, ref IntPtr result);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Uid_get_revocation_signature(IntPtr uid, ref IntPtr sig);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Uid_handle_destroy(IntPtr uid);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -269,6 +287,8 @@ public class RopLib {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_get_primary_grip(IntPtr key, ref IntPtr grip);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_primary_fprint(IntPtr key, ref IntPtr fprint);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_allows_usage(IntPtr key, IntPtr usage, ref IntPtr result);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_get_creation(IntPtr key, ref IntPtr result);
@@ -276,6 +296,10 @@ public class RopLib {
     private delegate uint Key_get_expiration(IntPtr key, ref IntPtr result);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_set_expiration(IntPtr key, uint expiry);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_is_valid(IntPtr key, ref IntPtr result);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_valid_till(IntPtr key, ref IntPtr result);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_is_revoked(IntPtr key, ref IntPtr result);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -288,6 +312,16 @@ public class RopLib {
     private delegate uint Key_is_retired(IntPtr key, ref IntPtr result);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_is_locked(IntPtr key, ref IntPtr result);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_protection_type(IntPtr key, ref IntPtr type);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_protection_mode(IntPtr key, ref IntPtr mode);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_protection_cipher(IntPtr key, ref IntPtr cipher);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_protection_hash(IntPtr key, ref IntPtr hash);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Key_get_protection_iterations(IntPtr key, ref IntPtr iterations);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Key_lock(IntPtr key);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -472,6 +506,10 @@ public class RopLib {
     private delegate uint Identifier_iterator_next(IntPtr it, ref IntPtr identifier);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint Identifier_iterator_destroy(IntPtr it);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Output_pipe(IntPtr input, IntPtr output);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate uint Output_armor_set_line_length(IntPtr output, uint llen);
 
     private enum LibSymID {
         result_to_string = 0,
@@ -540,6 +578,7 @@ public class RopLib {
         op_generate_get_key,
         op_generate_destroy,
         key_export,
+        key_export_autocrypt,
         key_export_revocation,
         key_revoke,
         key_remove,
@@ -550,18 +589,26 @@ public class RopLib {
         key_get_uid_count,
         key_get_uid_at,
         key_get_uid_handle_at,
+        uid_get_type,
+        uid_get_data,
+        uid_is_primary,
+        uid_is_valid,
         key_get_signature_count,
         key_get_signature_at,
+        key_get_revocation_signature,
         uid_get_signature_count,
         uid_get_signature_at,
+        signature_get_type,
         signature_get_alg,
         signature_get_hash_alg,
         signature_get_creation,
         signature_get_keyid,
         signature_get_signer,
+        signature_is_valid,
         signature_packet_to_json,
         signature_handle_destroy,
         uid_is_revoked,
+        uid_get_revocation_signature,
         uid_handle_destroy,
         key_get_subkey_count,
         key_get_subkey_at,
@@ -574,16 +621,24 @@ public class RopLib {
         key_get_keyid,
         key_get_grip,
         key_get_primary_grip,
+        key_get_primary_fprint,
         key_allows_usage,
         key_get_creation,
         key_get_expiration,
         key_set_expiration,
+        key_is_valid,
+        key_valid_till,
         key_is_revoked,
         key_get_revocation_reason,
         key_is_superseded,
         key_is_compromised,
         key_is_retired,
         key_is_locked,
+        key_get_protection_type,
+        key_get_protection_mode,
+        key_get_protection_cipher,
+        key_get_protection_hash,
+        key_get_protection_iterations,
         key_lock,
         key_unlock,
         key_is_protected,
@@ -676,7 +731,9 @@ public class RopLib {
         identifier_iterator_create,
         identifier_iterator_next,
         identifier_iterator_destroy,
-
+        output_pipe,
+        output_armor_set_line_length,
+        
         lib_sym_count
     }
 
@@ -820,6 +877,8 @@ public class RopLib {
                 fname = "rnp_op_generate_destroy"; ftype = typeof(Op_generate_destroy);
             break; case LibSymID.key_export:
                 fname = "rnp_key_export"; ftype = typeof(Key_export);
+            break; case LibSymID.key_export_autocrypt:
+                fname = "rnp_key_export_autocrypt"; ftype = typeof(Key_export_autocrypt);
             break; case LibSymID.key_export_revocation:
                 fname = "rnp_key_export_revocation"; ftype = typeof(Key_export_revocation);
             break; case LibSymID.key_revoke:
@@ -840,14 +899,26 @@ public class RopLib {
                 fname = "rnp_key_get_uid_at"; ftype = typeof(Key_get_uid_at);
             break; case LibSymID.key_get_uid_handle_at:
                 fname = "rnp_key_get_uid_handle_at"; ftype = typeof(Key_get_uid_handle_at);
+            break; case LibSymID.uid_get_type:
+                fname = "rnp_uid_get_type"; ftype = typeof(Uid_get_type);
+            break; case LibSymID.uid_get_data:
+                fname = "rnp_uid_get_data"; ftype = typeof(Uid_get_data);
+            break; case LibSymID.uid_is_primary:
+                fname = "rnp_uid_is_primary"; ftype = typeof(Uid_is_primary);
+            break; case LibSymID.uid_is_valid:
+                fname = "rnp_uid_is_valid"; ftype = typeof(Uid_is_valid);
             break; case LibSymID.key_get_signature_count:
                 fname = "rnp_key_get_signature_count"; ftype = typeof(Key_get_signature_count);
             break; case LibSymID.key_get_signature_at:
                 fname = "rnp_key_get_signature_at"; ftype = typeof(Key_get_signature_at);
+            break; case LibSymID.key_get_revocation_signature:
+                fname = "rnp_key_get_revocation_signature"; ftype = typeof(Key_get_revocation_signature);
             break; case LibSymID.uid_get_signature_count:
                 fname = "rnp_uid_get_signature_count"; ftype = typeof(Uid_get_signature_count);
             break; case LibSymID.uid_get_signature_at:
                 fname = "rnp_uid_get_signature_at"; ftype = typeof(Uid_get_signature_at);
+            break; case LibSymID.signature_get_type:
+                fname = "rnp_signature_get_type"; ftype = typeof(Signature_get_type);
             break; case LibSymID.signature_get_alg:
                 fname = "rnp_signature_get_alg"; ftype = typeof(Signature_get_alg);
             break; case LibSymID.signature_get_hash_alg:
@@ -858,12 +929,16 @@ public class RopLib {
                 fname = "rnp_signature_get_keyid"; ftype = typeof(Signature_get_keyid);
             break; case LibSymID.signature_get_signer:
                 fname = "rnp_signature_get_signer"; ftype = typeof(Signature_get_signer);
+            break; case LibSymID.signature_is_valid:
+                fname = "rnp_signature_is_valid"; ftype = typeof(Signature_is_valid);
             break; case LibSymID.signature_packet_to_json:
                 fname = "rnp_signature_packet_to_json"; ftype = typeof(Signature_packet_to_json);
             break; case LibSymID.signature_handle_destroy:
                 fname = "rnp_signature_handle_destroy"; ftype = typeof(Signature_handle_destroy);
             break; case LibSymID.uid_is_revoked:
                 fname = "rnp_uid_is_revoked"; ftype = typeof(Uid_is_revoked);
+            break; case LibSymID.uid_get_revocation_signature:
+                fname = "rnp_uid_get_revocation_signature"; ftype = typeof(Uid_get_revocation_signature);
             break; case LibSymID.uid_handle_destroy:
                 fname = "rnp_uid_handle_destroy"; ftype = typeof(Uid_handle_destroy);
             break; case LibSymID.key_get_subkey_count:
@@ -888,6 +963,8 @@ public class RopLib {
                 fname = "rnp_key_get_grip"; ftype = typeof(Key_get_grip);
             break; case LibSymID.key_get_primary_grip:
                 fname = "rnp_key_get_primary_grip"; ftype = typeof(Key_get_primary_grip);
+            break; case LibSymID.key_get_primary_fprint:
+                fname = "rnp_key_get_primary_fprint"; ftype = typeof(Key_get_primary_fprint);
             break; case LibSymID.key_allows_usage:
                 fname = "rnp_key_allows_usage"; ftype = typeof(Key_allows_usage);
             break; case LibSymID.key_get_creation:
@@ -896,6 +973,10 @@ public class RopLib {
                 fname = "rnp_key_get_expiration"; ftype = typeof(Key_get_expiration);
             break; case LibSymID.key_set_expiration:
                 fname = "rnp_key_set_expiration"; ftype = typeof(Key_set_expiration);
+            break; case LibSymID.key_is_valid:
+                fname = "rnp_key_is_valid"; ftype = typeof(Key_is_valid);
+            break; case LibSymID.key_valid_till:
+                fname = "rnp_key_valid_till"; ftype = typeof(Key_valid_till);
             break; case LibSymID.key_is_revoked:
                 fname = "rnp_key_is_revoked"; ftype = typeof(Key_is_revoked);
             break; case LibSymID.key_get_revocation_reason:
@@ -908,6 +989,16 @@ public class RopLib {
                 fname = "rnp_key_is_retired"; ftype = typeof(Key_is_retired);
             break; case LibSymID.key_is_locked:
                 fname = "rnp_key_is_locked"; ftype = typeof(Key_is_locked);
+            break; case LibSymID.key_get_protection_type:
+                fname = "rnp_key_get_protection_type"; ftype = typeof(Key_get_protection_type);
+            break; case LibSymID.key_get_protection_mode:
+                fname = "rnp_key_get_protection_mode"; ftype = typeof(Key_get_protection_mode);
+            break; case LibSymID.key_get_protection_cipher:
+                fname = "rnp_key_get_protection_cipher"; ftype = typeof(Key_get_protection_cipher);
+            break; case LibSymID.key_get_protection_hash:
+                fname = "rnp_key_get_protection_hash"; ftype = typeof(Key_get_protection_hash);
+            break; case LibSymID.key_get_protection_iterations:
+                fname = "rnp_key_get_protection_iterations"; ftype = typeof(Key_get_protection_iterations);
             break; case LibSymID.key_lock:
                 fname = "rnp_key_lock"; ftype = typeof(Key_lock);
             break; case LibSymID.key_unlock:
@@ -1092,6 +1183,10 @@ public class RopLib {
                 fname = "rnp_identifier_iterator_next"; ftype = typeof(Identifier_iterator_next);
             break; case LibSymID.identifier_iterator_destroy:
                 fname = "rnp_identifier_iterator_destroy"; ftype = typeof(Identifier_iterator_destroy);
+            break; case LibSymID.output_pipe:
+                fname = "rnp_output_pipe"; ftype = typeof(Output_pipe);
+            break; case LibSymID.output_armor_set_line_length:
+                fname = "rnp_output_armor_set_line_length"; ftype = typeof(Output_armor_set_line_length);
             break;
             }
             if(NativeLibrary.TryGetExport(lib, fname, out symb)) {
@@ -1676,6 +1771,14 @@ public class RopLib {
         return ((Key_export)FFIFunction(LibSymID.key_export))(key, output, flags);
     }
     
+    //F(key: cd, subkey: cd, uid: str, output: cd, flags: int) -> int
+    public uint rnp_key_export_autocrypt(IntPtr key, IntPtr subkey, object uid, IntPtr output, uint flags) {
+        var enc = Encode(uid);
+        uint ret = ((Key_export_autocrypt)FFIFunction(LibSymID.key_export_autocrypt))(key, subkey, enc.P, output, flags);
+        FreeEncoded(enc);
+        return ret;
+    }
+    
     //F(key: cd, output: cd, flags: int, hash: str, code: str, reason: str) -> int
     public uint rnp_key_export_revocation(IntPtr key, IntPtr output, uint flags, object hash, object code, object reason) {
         var encs = new[] { Encode(hash), Encode(code), Encode(reason) };
@@ -1750,6 +1853,40 @@ public class RopLib {
         return ret;
     }
 
+    //F(uid: cd, type: [int]) -> int
+    public uint rnp_uid_get_type(IntPtr uid, out uint type) {
+        IntPtr ctype = IntPtr.Zero;
+        uint ret = ((Uid_get_type)FFIFunction(LibSymID.uid_get_type))(uid, ref ctype);
+        type = (uint)ctype.ToInt64();
+        return ret;
+    }
+
+    //F(uid: cd, data: [cd], size: [int]) -> int
+    public uint rnp_uid_get_data(IntPtr uid, out RopHandle data, out long size) {
+        IntPtr cdata = IntPtr.Zero;
+        IntPtr csize = IntPtr.Zero;
+        uint ret = ((Uid_get_data)FFIFunction(LibSymID.uid_get_data))(uid, ref cdata, ref csize);
+        data = new RopHandle(cdata);
+        size = csize.ToInt64();
+        return ret;
+    }
+
+    //F(uid: cd, primary: [int]) -> int
+    public uint rnp_uid_is_primary(IntPtr uid, out bool primary) {
+        IntPtr cprimary = IntPtr.Zero;
+        uint ret = ((Uid_is_primary)FFIFunction(LibSymID.uid_is_primary))(uid, ref cprimary);
+        primary = (cprimary.ToInt32()!=0);
+        return ret;
+    }
+
+    //F(uid: cd, valid: [int]) -> int
+    public uint rnp_uid_is_valid(IntPtr uid, out bool valid) {
+        IntPtr cvalid = IntPtr.Zero;
+        uint ret = ((Uid_is_valid)FFIFunction(LibSymID.uid_is_valid))(uid, ref cvalid);
+        valid = (cvalid.ToInt32()!=0);
+        return ret;
+    }
+
     //F(key: cd, count: [int]) -> int
     public uint rnp_key_get_signature_count(IntPtr key, out uint count) {
         IntPtr ccount = IntPtr.Zero;
@@ -1762,6 +1899,14 @@ public class RopLib {
     public uint rnp_key_get_signature_at(IntPtr key, uint idx, out RopHandle sig) {
         IntPtr csig = IntPtr.Zero;
         uint ret = ((Key_get_signature_at)FFIFunction(LibSymID.key_get_signature_at))(key, idx, ref csig);
+        sig = new RopHandle(csig);
+        return ret;
+    }
+
+    //F(key: cd, sig: [cd]) -> int
+    public uint rnp_key_get_revocation_signature(IntPtr key, out RopHandle sig) {
+        IntPtr csig = IntPtr.Zero;
+        uint ret = ((Key_get_revocation_signature)FFIFunction(LibSymID.key_get_revocation_signature))(key, ref csig);
         sig = new RopHandle(csig);
         return ret;
     }
@@ -1779,6 +1924,14 @@ public class RopLib {
         IntPtr csig = IntPtr.Zero;
         uint ret = ((Uid_get_signature_at)FFIFunction(LibSymID.uid_get_signature_at))(uid, idx, ref csig);
         sig = new RopHandle(csig);
+        return ret;
+    }
+
+    //F(uid: cd, sig: [cd]) -> int
+    public uint rnp_signature_get_type(IntPtr sig, out RopHandle type) {
+        IntPtr ctype = IntPtr.Zero;
+        uint ret = ((Signature_get_type)FFIFunction(LibSymID.signature_get_type))(sig, ref ctype);
+        type = new RopHandle(ctype, true);
         return ret;
     }
 
@@ -1802,7 +1955,7 @@ public class RopLib {
     public uint rnp_signature_get_creation(IntPtr sig, out uint create) {
         IntPtr ccreate = IntPtr.Zero;
         uint ret = ((Signature_get_creation)FFIFunction(LibSymID.signature_get_creation))(sig, ref ccreate);
-        create = (uint)ccreate.ToInt32();
+        create = (uint)ccreate.ToInt64();
         return ret;
     }
 
@@ -1820,6 +1973,11 @@ public class RopLib {
         uint ret = ((Signature_get_signer)FFIFunction(LibSymID.signature_get_signer))(sig, ref ckey);
         key = new RopHandle(ckey);
         return ret;
+    }
+
+    //F(sig: cd, flags: int) -> int
+    public uint rnp_signature_is_valid(IntPtr sig, uint flags) {
+        return ((Signature_is_valid)FFIFunction(LibSymID.signature_is_valid))(sig, flags);
     }
 
     //F(sig: cd, flags: int, json: [cd]) -> int
@@ -1843,6 +2001,14 @@ public class RopLib {
         return ret;
     }
 
+    //F(uid: cd, sig: [cd]) -> int
+    public uint rnp_uid_get_revocation_signature(IntPtr uid, out RopHandle sig) {
+        IntPtr csig = IntPtr.Zero;
+        uint ret = ((Uid_get_revocation_signature)FFIFunction(LibSymID.uid_get_revocation_signature))(uid, ref csig);
+        sig = new RopHandle(csig);
+        return ret;
+    }
+    
     //F(uid: cd) -> int
     public uint rnp_uid_handle_destroy(IntPtr uid) {
         return ((Uid_handle_destroy)FFIFunction(LibSymID.uid_handle_destroy))(uid);
@@ -1936,6 +2102,14 @@ public class RopLib {
         return ret;
     }
 
+    //F(key: cd, fprint: [cd]) -> int
+    public uint rnp_key_get_primary_fprint(IntPtr key, out RopHandle fprint) {
+        IntPtr cprint = IntPtr.Zero;
+        uint ret = ((Key_get_primary_fprint)FFIFunction(LibSymID.key_get_primary_fprint))(key, ref cprint);
+        fprint = new RopHandle(cprint, true);
+        return ret;
+    }
+
     //F(key: cd, usage: str, result: [bool]) -> int
     public uint rnp_key_allows_usage(IntPtr key, object usage, out bool result) {
         IntPtr cresult = IntPtr.Zero;
@@ -1950,7 +2124,7 @@ public class RopLib {
     public uint rnp_key_get_creation(IntPtr key, out uint result) {
         IntPtr cresult = IntPtr.Zero;
         uint ret = ((Key_get_creation)FFIFunction(LibSymID.key_get_creation))(key, ref cresult);
-        result = (uint)cresult.ToInt32();
+        result = (uint)cresult.ToInt64();
         return ret;
     }
 
@@ -1958,13 +2132,29 @@ public class RopLib {
     public uint rnp_key_get_expiration(IntPtr key, out uint result) {
         IntPtr cresult = IntPtr.Zero;
         uint ret = ((Key_get_expiration)FFIFunction(LibSymID.key_get_expiration))(key, ref cresult);
-        result = (uint)cresult.ToInt32();
+        result = (uint)cresult.ToInt64();
         return ret;
     }
 
     //F(key: cd, expiry: int) -> int
     public uint rnp_key_set_expiration(IntPtr key, uint expiry) {
         return ((Key_set_expiration)FFIFunction(LibSymID.key_set_expiration))(key, expiry);
+    }
+
+    //F(key: cd, result: [bool]) -> int
+    public uint rnp_key_is_valid(IntPtr key, out bool result) {
+        IntPtr cresult = IntPtr.Zero;
+        uint ret = ((Key_is_valid)FFIFunction(LibSymID.key_is_valid))(key, ref cresult);
+        result = (cresult.ToInt32()!=0);
+        return ret;
+    }
+
+    //F(key: cd, result: [int]) -> int
+    public uint rnp_key_valid_till(IntPtr key, out uint result) {
+        IntPtr cresult = IntPtr.Zero;
+        uint ret = ((Key_valid_till)FFIFunction(LibSymID.key_valid_till))(key, ref cresult);
+        result = (uint)cresult.ToInt64();
+        return ret;
     }
 
     //F(key: cd, result: [bool]) -> int
@@ -2015,6 +2205,46 @@ public class RopLib {
         return ret;
     }
 
+    //F(key: cd, type: [str]) -> int
+    public uint rnp_key_get_protection_type(IntPtr key, out RopHandle type) {
+        IntPtr ctype = IntPtr.Zero;
+        uint ret = ((Key_get_protection_type)FFIFunction(LibSymID.key_get_protection_type))(key, ref ctype);
+        type = new RopHandle(ctype, true);
+        return ret;
+    }
+
+    //F(key: cd, type: [str]) -> int
+    public uint rnp_key_get_protection_mode(IntPtr key, out RopHandle cipher) {
+        IntPtr ccipher = IntPtr.Zero;
+        uint ret = ((Key_get_protection_mode)FFIFunction(LibSymID.key_get_protection_mode))(key, ref ccipher);
+        cipher = new RopHandle(ccipher, true);
+        return ret;
+    }
+
+    //F(key: cd, type: [str]) -> int
+    public uint rnp_key_get_protection_cipher(IntPtr key, out RopHandle cipher) {
+        IntPtr ccipher = IntPtr.Zero;
+        uint ret = ((Key_get_protection_cipher)FFIFunction(LibSymID.key_get_protection_cipher))(key, ref ccipher);
+        cipher = new RopHandle(ccipher, true);
+        return ret;
+    }
+
+    //F(key: cd, type: [str]) -> int
+    public uint rnp_key_get_protection_hash(IntPtr key, out RopHandle hash) {
+        IntPtr chash = IntPtr.Zero;
+        uint ret = ((Key_get_protection_hash)FFIFunction(LibSymID.key_get_protection_hash))(key, ref chash);
+        hash = new RopHandle(chash, true);
+        return ret;
+    }
+
+    //F(key: cd, type: [int]) -> int
+    public uint rnp_key_get_protection_iterations(IntPtr key, out uint iterations) {
+        IntPtr citers = IntPtr.Zero;
+        uint ret = ((Key_get_protection_iterations)FFIFunction(LibSymID.key_get_protection_iterations))(key, ref citers);
+        iterations = (uint)citers.ToInt32();
+        return ret;
+    }
+    
     //F(key: cd) -> int
     public uint rnp_key_lock(IntPtr key) {
         return ((Key_lock)FFIFunction(LibSymID.key_lock))(key);
@@ -2251,7 +2481,7 @@ public class RopLib {
         IntPtr cfilename = IntPtr.Zero, cmtime = IntPtr.Zero;
         uint ret = ((Op_verify_get_file_info)FFIFunction(LibSymID.op_verify_get_file_info))(op, ref cfilename, ref cmtime);
         filename = new RopHandle(cfilename, true);
-        mtime = (uint)cmtime.ToInt32();
+        mtime = (uint)cmtime.ToInt64();
         return ret;
     }
 
@@ -2407,8 +2637,8 @@ public class RopLib {
     public uint rnp_op_verify_signature_get_times(IntPtr sig, out uint create, out uint expires) {
         IntPtr ccreate = IntPtr.Zero, cexpires = IntPtr.Zero;
         uint ret = ((Op_verify_signature_get_times)FFIFunction(LibSymID.op_verify_signature_get_times))(sig, ref ccreate, ref cexpires);
-        create = (uint)ccreate.ToInt32();
-        expires = (uint)cexpires.ToInt32();
+        create = (uint)ccreate.ToInt64();
+        expires = (uint)cexpires.ToInt64();
         return ret;
     }
 
@@ -2727,6 +2957,16 @@ public class RopLib {
         return ((Identifier_iterator_destroy)FFIFunction(LibSymID.identifier_iterator_destroy))(it);
     }
 
+    //F(input: cd, output: [cd]) -> int
+    public uint rnp_output_pipe(IntPtr input, IntPtr output) {
+        return ((Output_pipe)FFIFunction(LibSymID.output_pipe))(input, output);
+    }
+    
+    //F(output: cd, llen: int) -> int
+    public uint rnp_output_armor_set_line_length(IntPtr output, uint llen) {
+        return ((Output_armor_set_line_length)FFIFunction(LibSymID.output_armor_set_line_length))(output, llen);
+    }
+    
     private void ClearCallbacks(RopHandle hnd) {
         RopCB[] cbs = null;
         if(h2cb.TryGetValue(hnd, out cbs) && cbs != null) {

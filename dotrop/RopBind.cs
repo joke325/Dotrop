@@ -35,7 +35,7 @@ namespace tech.janky.dotrop {
 
 /** 
 * <summary>Root object of bindings for the RNP OpenPGP library</summary>
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopBind {
@@ -237,7 +237,7 @@ public class RopBind {
             int idx = tags.IndexOf((int)from);
             if(!(idx < 0))
                 dtags = tags.GetRange(idx, tags.Count-idx);
-        } else if(tag == 0 && tags.Count > 1)
+        } else if(tag == 0 && tags.Count > 0)
             dtags.Add(tags[tags.Count-1]);
         else
             dtags.Add(tag);
@@ -276,11 +276,13 @@ public class RopBind {
             }
             
             // delete obsolete tags
-            if(!t2objs.ContainsKey(tg))
+            if(_object == null && objects == null && !t2objs.ContainsKey(tg))
                 tags2del.AddFirst(tg);
         }
         foreach(int tg in tags2del)
             tags.Remove(tg);
+        if(tags.Count == 0)
+            tags.Add(1);
         if(tags.Count == 1)
             this.cnt = tags[tags.Count-1];
 
@@ -325,7 +327,7 @@ public class RopBind {
     }
 
     public long ropid() {
-        return 1592576775;
+        return 1610638124;
     }
 
     // Constants

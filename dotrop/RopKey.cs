@@ -32,7 +32,7 @@ using tech.janky.dotrop.rop;
 namespace tech.janky.dotrop {
 
 /** 
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopKey : RopObject {
@@ -75,6 +75,10 @@ public class RopKey : RopObject {
         int ret = (int)lib.rnp_key_get_primary_grip(kid, out RopHandle hnd);
         return Util.GetRopString(lib, ret, hnd);
     }
+    public string primary_fprint() {
+        int ret = (int)lib.rnp_key_get_primary_fprint(kid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
     public string fprint() {
         int ret = (int)lib.rnp_key_get_fprint(kid, out RopHandle hnd);
         return Util.GetRopString(lib, ret, hnd);
@@ -99,6 +103,19 @@ public class RopKey : RopObject {
         int ret = (int)lib.rnp_key_set_expiration(kid, (uint)Util.TimeDelta2Sec(expiry));
         Util.Return(ret);
     }
+    public bool is_valid() {
+        int ret = (int)lib.rnp_key_is_valid(kid, out bool bl);
+        return Util.PopBool(lib, bl, ret);
+    }
+    public DateTime valid_till() {
+        int ret = (int)lib.rnp_key_valid_till(kid, out uint dt);
+        DateTime dtime = DateTimeOffset.FromUnixTimeSeconds(Util.PopLong(lib, (long)dt, ret)).LocalDateTime;
+        if(dt == 0)
+            dtime = DateTime.MinValue;
+        else if(dt == 0xffffffff)
+            dtime = DateTime.MaxValue;
+        return dtime;
+    }
     public bool is_revoked() {
         int ret = (int)lib.rnp_key_is_revoked(kid, out bool bl);
         return Util.PopBool(lib, bl, ret);
@@ -118,6 +135,26 @@ public class RopKey : RopObject {
     public bool is_locked() {
         int ret = (int)lib.rnp_key_is_locked(kid, out bool bl);
         return Util.PopBool(lib, bl, ret);
+    }
+    public string protection_type() {
+        int ret = (int)lib.rnp_key_get_protection_type(kid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
+    public string protection_mode() {
+        int ret = (int)lib.rnp_key_get_protection_mode(kid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
+    public string protection_cipher() {
+        int ret = (int)lib.rnp_key_get_protection_cipher(kid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
+    public string protection_hash() {
+        int ret = (int)lib.rnp_key_get_protection_hash(kid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
+    public int protection_iterations() {
+        int ret = (int)lib.rnp_key_get_protection_iterations(kid, out uint cn);
+        return Util.PopInt(lib, (int)cn, ret);
     }
     public bool is_protected() {
         int ret = (int)lib.rnp_key_is_protected(kid, out bool bl);
@@ -280,6 +317,15 @@ public class RopKey : RopObject {
         }
         throw new RopError(RopBind.ROP_ERROR_INTERNAL);
     }
+    public RopSign get_revocation_signature(int tag = 0) {
+        int ret = (int)lib.rnp_key_get_revocation_signature(kid, out RopHandle hnd);
+        if(own.TryGetTarget(out RopBind bind)) {
+            RopSign sign = new RopSign(bind, Util.PopHandle(lib, hnd, ret));
+            bind.PutObj(sign, tag);
+            return sign;
+        }
+        throw new RopError(RopBind.ROP_ERROR_INTERNAL);
+    }
     public void export(RopOutput output, bool pub = true, bool sec = true, bool subkey = false, bool armored = false) {
         RopHandle outp = (output!=null? output.getHandle() : RopHandle.Null);
         int flags = (pub? ROPD.RNP_KEY_EXPORT_PUBLIC : 0);
@@ -294,6 +340,12 @@ public class RopKey : RopObject {
     }
     public void export_secret(RopOutput output, bool subkey = false, bool armored = false) {
         export(output, false, true, subkey, armored);
+    }
+    public void export_autocrypt(RopKey subkey, string uid, RopOutput output) {
+        RopHandle subk = (subkey!=null? subkey.getHandle() : RopHandle.Null);
+        RopHandle outp = (output!=null? output.getHandle() : RopHandle.Null);
+        int ret = (int)lib.rnp_key_export_autocrypt(kid, subk, uid, outp, 0);
+        Util.Return(ret);
     }
     public void remove(bool pub = false, bool sec = false, bool subkeys = false) {
         int flags = (pub? ROPD.RNP_KEY_REMOVE_PUBLIC : 0);
@@ -324,7 +376,7 @@ public class RopKey : RopObject {
 }
 
 /** 
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopUidHandle : RopObject {
@@ -349,6 +401,28 @@ public class RopUidHandle : RopObject {
     
     // API
 
+    public int get_type() {
+        int ret = (int)lib.rnp_uid_get_type(huid, out uint type);
+        return Util.PopInt(lib, (int)type, ret);
+    }
+    public RopData get_data() {
+        int ret = (int)lib.rnp_uid_get_data(huid, out RopHandle hnd, out long size);
+        long len = Util.PopLong(lib, size, ret);
+        if(own.TryGetTarget(out RopBind bind)) {
+            RopData data = new RopData(bind, Util.PopHandle(lib, hnd, ret), len);
+            bind.PutObj(data, 0);
+            return data;
+        }
+        throw new RopError(RopBind.ROP_ERROR_INTERNAL);
+    }
+    public bool is_primary() {
+        int ret = (int)lib.rnp_uid_is_primary(huid, out bool primary);
+        return Util.PopBool(lib, primary, ret);
+    }
+    public bool is_valid() {
+        int ret = (int)lib.rnp_uid_is_valid(huid, out bool valid);
+        return Util.PopBool(lib, valid, ret);
+    }
     public int signature_count() {
         int ret = (int)lib.rnp_uid_get_signature_count(huid, out uint cn);
         return Util.PopInt(lib, (int)cn, ret);
@@ -359,6 +433,15 @@ public class RopUidHandle : RopObject {
     }
     public RopSign get_signature_at(int idx, int tag = 0) {
         int ret = (int)lib.rnp_uid_get_signature_at(huid, (uint)idx, out RopHandle sg);
+        if(own.TryGetTarget(out RopBind bind)) {
+            RopSign sign = new RopSign(bind, Util.PopHandle(lib, sg, ret));
+            bind.PutObj(sign, tag);
+            return sign;
+        }
+        throw new RopError(RopBind.ROP_ERROR_INTERNAL);
+    }
+    public RopSign get_revocation_signature(int tag = 0) {
+        int ret = (int)lib.rnp_uid_get_revocation_signature(huid, out RopHandle sg);
         if(own.TryGetTarget(out RopBind bind)) {
             RopSign sign = new RopSign(bind, Util.PopHandle(lib, sg, ret));
             bind.PutObj(sign, tag);

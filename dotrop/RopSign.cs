@@ -32,7 +32,7 @@ using tech.janky.dotrop.rop;
 namespace tech.janky.dotrop {
 
 /** 
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopSign : RopObject {
@@ -59,6 +59,10 @@ public class RopSign : RopObject {
 
     // API
 
+    public string get_type() {
+        int ret = (int)lib.rnp_signature_get_type(sgid, out RopHandle hnd);
+        return Util.GetRopString(lib, ret, hnd);
+    }
     public string alg() {
         int ret = (int)lib.rnp_signature_get_alg(sgid, out RopHandle hnd);
         return Util.GetRopString(lib, ret, hnd);
@@ -74,6 +78,10 @@ public class RopSign : RopObject {
     public String keyid() {
         int ret = (int)lib.rnp_signature_get_keyid(sgid, out RopHandle hnd);
         return Util.GetRopString(lib, ret, hnd);
+    }
+    public void is_valid() {
+        int ret = (int)lib.rnp_signature_is_valid(sgid, 0);
+        Util.Return(ret);
     }
     public RopKey get_signer(int tag = 0) {
         int ret = (int)lib.rnp_signature_get_signer(sgid, out RopHandle hnd);

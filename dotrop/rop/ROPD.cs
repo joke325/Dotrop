@@ -28,7 +28,7 @@
 namespace tech.janky.dotrop.rop {
 
 /**
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopLibDef {
@@ -63,11 +63,16 @@ public class RopLibDef {
     public const int RNP_LOAD_SAVE_PUBLIC_KEYS = (1 << 0);
     public const int RNP_LOAD_SAVE_SECRET_KEYS = (1 << 1);
     public const int RNP_LOAD_SAVE_PERMISSIVE = (1 << 8);
+    public const int RNP_LOAD_SAVE_SINGLE = (1 << 9);
 
     // Flags for output structure creation.
     public const int RNP_OUTPUT_FILE_OVERWRITE = (1 << 0);
     public const int RNP_OUTPUT_FILE_RANDOM = (1 << 1);
 
+    // User id type
+    public const int RNP_USER_ID = 1;
+    public const int RNP_USER_ATTR = 2;
+    
     // Algorithm Strings
     
     public const string RNP_ALGNAME_PLAINTEXT = "PLAINTEXT";

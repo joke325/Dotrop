@@ -32,7 +32,7 @@ using tech.janky.dotrop.rop;
 namespace tech.janky.dotrop {
 
 /** 
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopInput : RopObject, RopInputCallBack {
@@ -132,11 +132,15 @@ public class RopInput : RopObject, RopInputCallBack {
         int ret = (int)lib.rnp_dearmor(iid, output!=null? output.getHandle() : RopHandle.Null);
         Util.Return(ret);
     }
-    public String guess_contents() {
+    public string guess_contents() {
         int ret = (int)lib.rnp_guess_contents(iid, out RopHandle hnd);
         return Util.GetRopString(lib, ret, hnd);
     }
-
+    public void output_pipe(RopOutput output) {
+        int ret = (int)lib.rnp_output_pipe(iid, output!=null? output.getHandle() : RopHandle.Null);
+        Util.Return(ret);
+    }
+    
     private WeakReference<RopBind> own;
     private RopLib lib;
     private RopHandle iid;
@@ -144,7 +148,7 @@ public class RopInput : RopObject, RopInputCallBack {
 }
     
 /** 
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopOutput : RopObject, RopOutputCallBack {
@@ -211,7 +215,7 @@ public class RopOutput : RopObject, RopOutputCallBack {
     }
     public RopData memory_get_buf(bool doCopy) {
         int ret = (int)lib.rnp_output_memory_get_buf(oid, out RopHandle hnd, out long ln, doCopy);
-        long len = Util.PopLong(lib, (long)ln, ret);
+        long len = Util.PopLong(lib, ln, ret);
         if(own.TryGetTarget(out RopBind bind)) {
             RopData data = new RopData(bind, Util.PopHandle(lib, hnd, ret), len);
             if(doCopy)
@@ -222,7 +226,11 @@ public class RopOutput : RopObject, RopOutputCallBack {
     }
     public long write(RopData data) {
         int ret = (int)lib.rnp_output_write(oid, data.getDataObj(), data.getDataLen(), out long wr);
-        return Util.PopLong(lib, (long)wr, ret);
+        return Util.PopLong(lib, wr, ret);
+    }
+    public void armor_set_line_length(int llen) {
+        int ret = (int)lib.rnp_output_armor_set_line_length(oid, (uint)llen);
+        Util.Return(ret);
     }
 
     private WeakReference<RopBind> own;

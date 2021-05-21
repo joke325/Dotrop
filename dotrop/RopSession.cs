@@ -33,7 +33,7 @@ namespace tech.janky.dotrop {
 
 /** 
 * <summary>Wraps FFI related ops</summary>
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopSession : RopObject, RopPassCallBack, RopKeyCallBack {
@@ -219,24 +219,32 @@ public class RopSession : RopObject, RopPassCallBack, RopKeyCallBack {
         int ret = (int)lib.rnp_generate_key_ex(sid, keyAlg, subAlg, (uint)keyBits, (uint)subBits, keyCurve, subCurve, userid, password, out RopHandle hnd);
         return PutKey(Util.PopHandle(lib, hnd, ret), tag);
     }
-    public RopData import_keys(RopInput input, bool pub = true, bool sec = true, bool perm = false) {
+    public RopData import_keys(RopInput input, bool pub = true, bool sec = true, bool perm = false, bool sngl = false) {
         RopHandle inp = (input!=null? input.getHandle() : RopHandle.Null);
         int flags = (pub? ROPD.RNP_LOAD_SAVE_PUBLIC_KEYS : 0);
         flags |= (sec? ROPD.RNP_LOAD_SAVE_SECRET_KEYS : 0);
         flags |= (perm? ROPD.RNP_LOAD_SAVE_PERMISSIVE : 0);
+        flags |= (sngl? ROPD.RNP_LOAD_SAVE_SINGLE : 0);
         int ret = (int)lib.rnp_import_keys(sid, inp, (uint)flags, out RopHandle hnd);
         if(own.TryGetTarget(out RopBind bind)) {
-            RopData data = new RopData(bind, Util.PopHandle(lib, hnd, ret), 0);
-            bind.PutObj(data, 0);
-            return data;
+            hnd = Util.PopHandle(lib, hnd, ret!=ROPE.RNP_ERROR_EOF? ret : ROPE.RNP_SUCCESS);
+            if(ret != ROPE.RNP_ERROR_EOF) {
+                RopData data = new RopData(bind, hnd, 0);
+                bind.PutObj(data, 0);
+                return data;
+            }
+            return null;
         }
         throw new RopError(RopBind.ROP_ERROR_INTERNAL);
     }
-    public RopData import_keys_public(RopInput input, bool perm = false) {
-        return import_keys(input, true, false, perm);
+    public RopData import_keys_public(RopInput input, bool perm = false, bool sngl = false) {
+        return import_keys(input, true, false, perm, sngl);
     }
-    public RopData import_keys_secret(RopInput input, bool perm = false) {
-        return import_keys(input, false, true, perm);
+    public RopData import_keys_secret(RopInput input, bool perm = false, bool sngl = false) {
+        return import_keys(input, false, true, perm, sngl);
+    }
+    public RopData import_keys_single(RopInput input, bool pub = true, bool sec = true, bool perm = false) {
+        return import_keys(input, pub, sec, perm, true);
     }
 
     public void set_pass_provider(SessionPassCallBack getpasscb, object getpasscbCtx) {

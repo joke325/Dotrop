@@ -28,7 +28,7 @@
 namespace tech.janky.dotrop.rop {
 
 /**
-* version 0.3.1
+* version 0.14.0
 * since   0.3.1
 */
 public class RopErr {
@@ -74,6 +74,7 @@ public class RopErr {
     public const int RNP_ERROR_NO_SIGNATURES_FOUND = rnp_error_bad_state+10;
     
     public const int RNP_ERROR_SIGNATURE_EXPIRED = rnp_error_bad_state+11;
+    public const int RNP_ERROR_VERIFICATION_FAILED = rnp_error_bad_state+12;
 
     // Parsing
     
